@@ -1,88 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useDnDList, useDnDDetail } from "../hooks/useDnDData";
+import RaceDetails from "./RaceDetails";
 
 function CharacterForm() {
   const [name, setName] = useState("");
-
-  const [races, setRaces] = useState([]);
-  const [classes, setClasses] = useState([]);
-
   const [selectedRace, setSelectedRace] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
-
-  const [raceDetails, setRaceDetails] = useState(null);
-  const [classDetails, setClassDetails] = useState(null);
-
-  const [backgrounds, setBackgrounds] = useState([]);
   const [selectedBackground, setSelectedBackground] = useState("");
-  const [backgroundDetails, setBackgroundDetails] = useState(null);
-
-  const [selectedClassProficiencies, setSelectedClassProficiencies] = useState(
-    []
-  );
-  const [selectedRaceProficiencies, setSelectedRaceProficiencies] = useState(
-    []
-  );
-
+  const [selectedClassProficiencies, setSelectedClassProficiencies] = useState([]);
+  const [selectedRaceProficiencies, setSelectedRaceProficiencies] = useState([]);
   const [selectedEquipment, setSelectedEquipment] = useState([]);
 
-  // Fetch race and class options on load
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const raceRes = await fetch("https://www.dnd5eapi.co/api/2014/races");
-        const classRes = await fetch(
-          "https://www.dnd5eapi.co/api/2014/classes"
-        );
-        const backgroundRes = await fetch(
-          "https://www.dnd5eapi.co/api/2014/backgrounds"
-        );
+  const { data: races } = useDnDList("races");
+  const { data: classes } = useDnDList("classes");
+  const { data: backgrounds } = useDnDList("backgrounds");
 
-        const raceData = await raceRes.json();
-        const classData = await classRes.json();
-        const backgroundData = await backgroundRes.json();
-
-        setBackgrounds(backgroundData.results);
-        setRaces(raceData.results);
-        setClasses(classData.results);
-      } catch (err) {
-        console.error("Error fetching base lists:", err);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Fetch details about selected race
-  useEffect(() => {
-    if (!selectedRace) return;
-
-    fetch(`https://www.dnd5eapi.co/api/2014/races/${selectedRace}`)
-      .then((res) => res.json())
-      .then((data) => setRaceDetails(data))
-      .catch((err) => console.error("Failed to fetch race details:", err));
-  }, [selectedRace]);
-
-  // Fetch details about selected class
-  useEffect(() => {
-    if (!selectedClass) return;
-
-    fetch(`https://www.dnd5eapi.co/api/2014/classes/${selectedClass}`)
-      .then((res) => res.json())
-      .then((data) => setClassDetails(data))
-      .catch((err) => console.error("Failed to fetch class details:", err));
-  }, [selectedClass]);
-
-  // Fetch details about selected background
-  useEffect(() => {
-    if (!selectedBackground) return;
-
-    fetch(`https://www.dnd5eapi.co/api/2014/backgrounds/${selectedBackground}`)
-      .then((res) => res.json())
-      .then((data) => setBackgroundDetails(data))
-      .catch((err) =>
-        console.error("Failed to fetch background details:", err)
-      );
-  }, [selectedBackground]);
+  const raceDetails = useDnDDetail("races", selectedRace);
+  const classDetails = useDnDDetail("classes", selectedClass);
+  const backgroundDetails = useDnDDetail("backgrounds", selectedBackground);
 
   // Handle Class Proficiencies selection
   const handleClassProficiencyToggle = (index) => {
@@ -196,91 +131,11 @@ function CharacterForm() {
 
       {/* Display Race Details */}
       {raceDetails && (
-        <div className="mt-4">
-          <h5>
-            <strong>Race Details</strong>
-          </h5>
-          <p>
-            <strong>Speed:</strong> {`${raceDetails.speed} Feet`}
-          </p>
-          <p>
-            <strong>Languages:</strong>{" "}
-            {raceDetails.languages.map((lang) => lang.name).join(", ")}
-          </p>
-          <p>{raceDetails.language_desc}</p>
-          <p>
-            <strong>Ability Bonuses:</strong>
-          </p>
-          <ul>
-            {raceDetails.ability_bonuses.map((bonus, i) => (
-              <li key={i}>
-                {bonus.ability_score.name}: +{bonus.bonus}
-              </li>
-            ))}
-          </ul>
-          <p>
-            <strong>Alignment:</strong> {raceDetails.alignment}
-          </p>
-          <p>
-            <strong>Age:</strong> {raceDetails.age}
-          </p>
-          <p>
-            <strong>Size:</strong> {raceDetails.size_description}
-          </p>
-          <p>
-            <strong>Race Proficiencies:</strong>
-          </p>
-          <ul>
-            {raceDetails.starting_proficiencies?.map((prof, i) => (
-              <li key={i}>{prof.name}</li>
-            ))}
-          </ul>
-          {raceDetails.starting_proficiency_options?.from?.options?.length >
-            0 && (
-            <div className="mb-3">
-              <h6>
-                <strong>
-                  Choose {raceDetails.starting_proficiency_options.choose}{" "}
-                  Proficiency/Proficiencies:
-                </strong>
-              </h6>
-              {raceDetails.starting_proficiency_options.from.options.map(
-                (option, i) => {
-                  const index = option.item.index;
-                  const name = option.item.name;
-
-                  return (
-                    <div key={index} className="form-check">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        value={index}
-                        id={`race-prof-${index}`}
-                        checked={selectedRaceProficiencies.includes(index)}
-                        onChange={() => handleRaceProficiencyToggle(index)}
-                        disabled={
-                          !selectedRaceProficiencies.includes(index) &&
-                          selectedRaceProficiencies.length >=
-                            raceDetails.starting_proficiency_options.choose
-                        }
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor={`race-prof-${index}`}
-                      >
-                        {name}
-                      </label>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-          )}
-          <p>
-            <strong>Traits:</strong>{" "}
-            {raceDetails.traits.map((trait) => trait.name).join(", ")}
-          </p>
-        </div>
+        <RaceDetails
+          raceDetails={raceDetails}
+          selectedRaceProficiencies={selectedRaceProficiencies}
+          onToggle={handleRaceProficiencyToggle}
+        />
       )}
 
       {/* Display Class Details */}
