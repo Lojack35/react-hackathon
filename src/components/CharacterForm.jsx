@@ -25,49 +25,53 @@ function CharacterForm() {
   const classDetails = useDnDDetail("classes", selectedClass);
   const backgroundDetails = useDnDDetail("backgrounds", selectedBackground);
 
-  // Handle Class Proficiencies selection
-  const handleClassProficiencyToggle = (index) => {
-    setSelectedClassProficiencies((prev) => {
-      if (prev.includes(index)) {
-        // Deselect if already selected
-        return prev.filter((i) => i !== index);
-      } else if (prev.length < classDetails.proficiency_choices[0].choose) {
-        // Add new selection if under limit
-        return [...prev, index];
-      } else {
-        // Ignore if limit reached
-        return prev;
-      }
-    });
-  };
+  // // Handle Class Proficiencies selection
+  // const handleClassProficiencyToggle = (index) => {
+  //   setSelectedClassProficiencies((prev) => {
+  //     if (prev.includes(index)) {
+  //       // Deselect if already selected
+  //       return prev.filter((i) => i !== index);
+  //     } else if (prev.length < classDetails.proficiency_choices[0].choose) {
+  //       // Add new selection if under limit
+  //       return [...prev, index];
+  //     } else {
+  //       // Ignore if limit reached
+  //       return prev;
+  //     }
+  //   });
+  // };
 
-  // Handle Race Proficiencies selection
-  const handleRaceProficiencyToggle = (index) => {
-    setSelectedRaceProficiencies((prev) => {
-      if (prev.includes(index)) {
-        // Deselect if already selected
-        return prev.filter((i) => i !== index);
-      } else if (
-        prev.length < raceDetails.starting_proficiency_options.choose
-      ) {
-        // Add new selection if under limit
-        return [...prev, index];
-      } else {
-        // Ignore if limit reached
-        return prev;
-      }
-    });
-  };
+  // // Handle Race Proficiencies selection
+  // const handleRaceProficiencyToggle = (index) => {
+  //   setSelectedRaceProficiencies((prev) => {
+  //     if (prev.includes(index)) {
+  //       // Deselect if already selected
+  //       return prev.filter((i) => i !== index);
+  //     } else if (
+  //       prev.length < raceDetails.starting_proficiency_options.choose
+  //     ) {
+  //       // Add new selection if under limit
+  //       return [...prev, index];
+  //     } else {
+  //       // Ignore if limit reached
+  //       return prev;
+  //     }
+  //   });
+  // };
 
-  // Handle Class Equipment selection
-  const handleEquipmentToggle = (index) => {
-    setSelectedEquipment((prev) => {
+  const handleProficiencyToggle = (
+    index,
+    maxAllowed,
+    selected,
+    setSelected
+  ) => {
+    setSelected((prev) => {
       if (prev.includes(index)) {
-        // Deselect if already selected
         return prev.filter((i) => i !== index);
-      } else {
-        // Add new selection
+      } else if (prev.length < maxAllowed) {
         return [...prev, index];
+      } else {
+        return prev;
       }
     });
   };
@@ -140,7 +144,14 @@ function CharacterForm() {
         <RaceDetails
           raceDetails={raceDetails}
           selectedRaceProficiencies={selectedRaceProficiencies}
-          onToggle={handleRaceProficiencyToggle}
+          onToggle={(index) =>
+            handleProficiencyToggle(
+              index,
+              raceDetails.starting_proficiency_options?.choose,
+              selectedRaceProficiencies,
+              setSelectedRaceProficiencies
+            )
+          }
         />
       )}
 
@@ -149,7 +160,14 @@ function CharacterForm() {
         <ClassDetails
           classDetails={classDetails}
           selectedClassProficiencies={selectedClassProficiencies}
-          onToggle={handleClassProficiencyToggle}
+          onToggle={(index) =>
+            handleProficiencyToggle(
+              index,
+              classDetails.proficiency_choices[0].choose,
+              selectedClassProficiencies,
+              setSelectedClassProficiencies
+            )
+          }
           selectedEquipment={selectedEquipment}
           setSelectedEquipment={setSelectedEquipment}
         />
