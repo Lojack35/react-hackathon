@@ -2,14 +2,19 @@ import { useState } from "react";
 import { useDnDList, useDnDDetail } from "../hooks/useDnDData";
 import RaceDetails from "./RaceDetails";
 import ClassDetails from "./ClassDetails";
+import BackgroundDetails from "./BackgroundDetails";
 
 function CharacterForm() {
   const [name, setName] = useState("");
   const [selectedRace, setSelectedRace] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedBackground, setSelectedBackground] = useState("");
-  const [selectedClassProficiencies, setSelectedClassProficiencies] = useState([]);
-  const [selectedRaceProficiencies, setSelectedRaceProficiencies] = useState([]);
+  const [selectedClassProficiencies, setSelectedClassProficiencies] = useState(
+    []
+  );
+  const [selectedRaceProficiencies, setSelectedRaceProficiencies] = useState(
+    []
+  );
   const [selectedEquipment, setSelectedEquipment] = useState([]);
 
   const { data: races } = useDnDList("races");
@@ -152,36 +157,7 @@ function CharacterForm() {
 
       {/* Display Background Details */}
       {backgroundDetails && (
-        <div className="mt-4">
-          <h5>
-            <strong>Background Details</strong>
-          </h5>
-          <p>
-            <strong>Feature:</strong> {backgroundDetails.feature.name}
-          </p>
-          <p>
-            <strong>Feature Description:</strong>{" "}
-            {backgroundDetails.feature.desc}
-          </p>
-          <p>
-            <strong>Proficiencies:</strong>
-          </p>
-          <ul>
-            {backgroundDetails.starting_proficiencies?.map((prof, i) => (
-              <li key={i}>{prof.name}</li>
-            ))}
-          </ul>
-          <p>
-            <strong>Starting Equipment:</strong>
-          </p>
-          <ul>
-            {backgroundDetails.starting_equipment?.map((item, i) => (
-              <li key={i}>
-                {item.equipment.name} x{item.quantity}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <BackgroundDetails backgroundDetails={backgroundDetails} />
       )}
 
       <div className="d-grid mt-4">
