@@ -23,7 +23,7 @@ function BackgroundDetails({ backgroundDetails }) {
         ))}
       </ul>
       <p>
-      	<strong>Starting Equipment:</strong>
+        <strong>Starting Equipment:</strong>
       </p>
       <ul>
         {backgroundDetails.starting_equipment?.map((item, i) => (

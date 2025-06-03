@@ -22,7 +22,9 @@ export function useDnDDetail(endpoint, selected) {
     fetch(`https://www.dnd5eapi.co/api/2014/${endpoint}/${selected}`)
       .then((res) => res.json())
       .then(setDetails)
-      .catch((error) => console.error(`Error fetching ${endpoint} details`, err));
+      .catch((error) =>
+        console.error(`Error fetching ${endpoint} details`, err)
+      );
   }, [endpoint, selected]);
   return details;
 }

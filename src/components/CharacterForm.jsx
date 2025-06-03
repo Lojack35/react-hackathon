@@ -4,7 +4,7 @@ import RaceDetails from "./RaceDetails";
 import ClassDetails from "./ClassDetails";
 import BackgroundDetails from "./BackgroundDetails";
 
-function CharacterForm() {
+function CharacterForm({ onGenerate }) {
   const [name, setName] = useState("");
   const [selectedRace, setSelectedRace] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
@@ -25,46 +25,7 @@ function CharacterForm() {
   const classDetails = useDnDDetail("classes", selectedClass);
   const backgroundDetails = useDnDDetail("backgrounds", selectedBackground);
 
-  // // Handle Class Proficiencies selection
-  // const handleClassProficiencyToggle = (index) => {
-  //   setSelectedClassProficiencies((prev) => {
-  //     if (prev.includes(index)) {
-  //       // Deselect if already selected
-  //       return prev.filter((i) => i !== index);
-  //     } else if (prev.length < classDetails.proficiency_choices[0].choose) {
-  //       // Add new selection if under limit
-  //       return [...prev, index];
-  //     } else {
-  //       // Ignore if limit reached
-  //       return prev;
-  //     }
-  //   });
-  // };
-
-  // // Handle Race Proficiencies selection
-  // const handleRaceProficiencyToggle = (index) => {
-  //   setSelectedRaceProficiencies((prev) => {
-  //     if (prev.includes(index)) {
-  //       // Deselect if already selected
-  //       return prev.filter((i) => i !== index);
-  //     } else if (
-  //       prev.length < raceDetails.starting_proficiency_options.choose
-  //     ) {
-  //       // Add new selection if under limit
-  //       return [...prev, index];
-  //     } else {
-  //       // Ignore if limit reached
-  //       return prev;
-  //     }
-  //   });
-  // };
-
-  const handleProficiencyToggle = (
-    index,
-    maxAllowed,
-    selected,
-    setSelected
-  ) => {
+  const handleProficiencyToggle = (index, maxAllowed, setSelected) => {
     setSelected((prev) => {
       if (prev.includes(index)) {
         return prev.filter((i) => i !== index);
@@ -148,7 +109,6 @@ function CharacterForm() {
             handleProficiencyToggle(
               index,
               raceDetails.starting_proficiency_options?.choose,
-              selectedRaceProficiencies,
               setSelectedRaceProficiencies
             )
           }
@@ -164,7 +124,6 @@ function CharacterForm() {
             handleProficiencyToggle(
               index,
               classDetails.proficiency_choices[0].choose,
-              selectedClassProficiencies,
               setSelectedClassProficiencies
             )
           }
@@ -179,7 +138,27 @@ function CharacterForm() {
       )}
 
       <div className="d-grid mt-4">
-        <button className="btn btn-primary" disabled>
+        <button
+          className="btn btn-primary"
+          onClick={() => {
+            const formData = {
+              name,
+              selectedRace,
+              selectedClass,
+              selectedBackground,
+              selectedClassProficiencies,
+              selectedRaceProficiencies,
+              selectedEquipment,
+              raceDetails,
+              classDetails,
+              backgroundDetails,
+            };
+            onGenerate(formData);
+          }}
+          disabled={
+            !name || !selectedRace || !selectedClass || !selectedBackground
+          }
+        >
           Generate Character
         </button>
       </div>
