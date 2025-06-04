@@ -1,0 +1,94 @@
+/* Container for all ability scores */
+.ability-score-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Each ability box */
+.ability-box {
+  position: relative;
+  width: 70px;
+  padding: 10px;
+  border: 2px solid #333;
+  border-radius: 12px;
+  text-align: center;
+  background-color: #fff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  font-family: "Georgia", serif;
+}
+
+/* Label at top (e.g., STR, DEX) */
+.ability-box .label {
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+/* Modifier (big number) */
+.ability-box .modifier {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+/* Total score below modifier (small text) */
+.ability-box .total {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Tooltip styling */
+.ability-box:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip {
+  position: absolute;
+  top: 105%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+/* Temporary styling */
+.placeholder-box {
+  background-color: #eaeaea;
+  border: 2px dashed #999;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  font-style: italic;
+  color: #666;
+}
+
+.circle {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #333;
+  border-radius: 50%;
+}
+
+.circle.filled {
+  background-color: #333;
+}
+
+.death-save-circle {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #333;
+  background-color: #fff;
+}

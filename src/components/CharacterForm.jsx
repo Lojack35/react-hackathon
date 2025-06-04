@@ -16,9 +16,7 @@ function CharacterForm({ onGenerate }) {
     []
   );
   const [selectedEquipment, setSelectedEquipment] = useState([]);
-  const [scoreMethod, setScoreMethod] = useState("standard");
-  const [rolledScores, setRolledScores] = useState([]);
-  const [assignedScores, setAssignedScores] = useState({
+  const [abilityScores, setabilityScores] = useState({
     STR: null,
     DEX: null,
     CON: null,
@@ -46,20 +44,6 @@ function CharacterForm({ onGenerate }) {
       }
     });
   };
-
-  function roll4d6DropLowest() {
-    const rolls = Array.from(
-      { length: 4 },
-      () => Math.floor(Math.random() * 6) + 1
-    );
-    rolls.sort((a, b) => a - b);
-    return rolls.slice(1).reduce((sum, val) => sum + val, 0);
-  }
-
-  function handleRollStats() {
-    const newRolls = Array.from({ length: 6 }, roll4d6DropLowest);
-    setRolledScores(newRolls);
-  }
 
   return (
     <div className="card p-3 shadow-lg bg-light-subtle">
@@ -163,31 +147,6 @@ function CharacterForm({ onGenerate }) {
 
       {/* Ability Scores Section */}
       <div className="mb-3">
-        <label className="form-label">Ability Score Method</label>
-        <select
-          className="form-select"
-          value={scoreMethod}
-          onChange={(e) => {
-            setScoreMethod(e.target.value);
-            setAssignedScores({
-              STR: null,
-              DEX: null,
-              CON: null,
-              INT: null,
-              WIS: null,
-              CHA: null,
-            });
-            if (e.target.value === "roll") {
-              handleRollStats();
-            }
-          }}
-        >
-          <option value="standard">Standard Array</option>
-          <option value="roll">Roll for Stats</option>
-        </select>
-      </div>
-
-      <div className="mb-3">
         <label className="form-label">Assign Ability Scores</label>
 
         {["STR", "DEX", "CON", "INT", "WIS", "CHA"].map((ability) => (
@@ -195,23 +154,20 @@ function CharacterForm({ onGenerate }) {
             <strong className="w-25">{ability}</strong>
             <select
               className="form-select"
-              value={assignedScores[ability] ?? ""}
+              value={abilityScores[ability] ?? ""}
               onChange={(e) =>
-                setAssignedScores((prev) => ({
+                setabilityScores((prev) => ({
                   ...prev,
                   [ability]: parseInt(e.target.value),
                 }))
               }
             >
               <option value="">-- Select --</option>
-              {(scoreMethod === "standard"
-                ? [15, 14, 13, 12, 10, 8]
-                : rolledScores
-              )
+              {[15, 14, 13, 12, 10, 8]
                 .filter(
                   (score) =>
-                    !Object.values(assignedScores).includes(score) ||
-                    assignedScores[ability] === score
+                    !Object.values(abilityScores).includes(score) ||
+                    abilityScores[ability] === score
                 )
                 .map((score, i) => (
                   <option key={i} value={score}>
@@ -238,8 +194,7 @@ function CharacterForm({ onGenerate }) {
               raceDetails,
               classDetails,
               backgroundDetails,
-              assignedScores,
-              scoreMethod,
+              abilityScores,
             };
             onGenerate(formData);
           }}

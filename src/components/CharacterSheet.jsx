@@ -1,4 +1,13 @@
 import React from "react";
+import ProficiencyBonus from "./ProficiencyBonus";
+import AbilityScores from "./AbilityScores";
+import SavingThrows from "./SavingThrows";
+import Skills from "./Skills";
+import CombatStats from "./CombatStats";
+import Equipment from "./Equipment";
+import FeaturesAndTraits from "./FeaturesAndTraits";
+import getProficiencyBonus from "../utils/getProficiencyBonus";
+import "../CharacterSheet.css";
 
 function CharacterSheet({ formData }) {
   if (!formData) return null;
@@ -14,157 +23,133 @@ function CharacterSheet({ formData }) {
     selectedRaceProficiencies,
     selectedClassProficiencies,
     selectedEquipment,
+    abilityScores,
   } = formData;
 
+  const level = 1; // TODO: make dynamic later
+  const proficiencyBonus = getProficiencyBonus(level);
+
+  // Get background skill proficiencies
+  const backgroundSkills =
+    backgroundDetails?.starting_proficiencies?.map((p) =>
+      p.name.toLowerCase().replace("skill: ", "").trim()
+    ) || [];
+
+  // Get class skill proficiencies from selected indexes
+  const classSkills = selectedClassProficiencies
+    .map((index) =>
+      classDetails?.proficiency_choices
+        ?.flatMap((choice) => choice.from.options)
+        .find(
+          (opt) =>
+            opt.item.index === index && opt.item.index.startsWith("skill-")
+        )
+    )
+    .filter(Boolean)
+    .map((match) =>
+      match.item.name.toLowerCase().replace("skill: ", "").trim()
+    );
+
+  // Final combined list of skill proficiencies
+  const skillProficiencies = [...backgroundSkills, ...classSkills];
+
+  function getModifier(score) {
+    return Math.floor((score - 10) / 2);
+  }
+
   return (
-    <div className="card p-3 shadow-lg bg-light-subtle">
-      <div className="card-body">
-        <div className="container-fluid">
-          {/* TOP ROW: Character Name + Class/Race/Background */}
-          <div className="card mb-3">
-            <div className="card-body">
-              <div className="row mb-4">
-                <div className="col-md-8">
-                  <h2 className="mb-1">{name || "Unnamed Hero"}</h2>
-                </div>
-                <div className="col-md-4">
-                  <p className="mb-1">
-                    <strong>Class:</strong>{" "}
-                    {classDetails?.name || selectedClass}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Race:</strong> {raceDetails?.name || selectedRace}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Background:</strong>{" "}
-                    {backgroundDetails?.name || selectedBackground}
-                  </p>
-                </div>
-              </div>
-            </div>
+    <div className="character-sheet container-fluid p-4 bg-light-subtle rounded shadow">
+      {/* TOP SECTION: Name + Class/Level/Race/Background */}
+      <div className="top-section mb-4">
+        <div className="d-flex flex-column align-items-center">
+          <h2 className="mb-2">{name || "Unnamed Hero"}</h2>
+          <div className="d-flex flex-wrap justify-content-center gap-3">
+            <span>
+              <strong>Class:</strong> {classDetails?.name || selectedClass}
+            </span>
+            <span>
+              <strong>Race:</strong> {raceDetails?.name || selectedRace}
+            </span>
+            <span>
+              <strong>Background:</strong>{" "}
+              {backgroundDetails?.name || selectedBackground}
+            </span>
+            <span>
+              <strong>Level:</strong> 1
+            </span>{" "}
+            {/* TODO: make dynamic later */}
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN GRID */}
+      <div className="row">
+        {/* LEFT COLUMN */}
+        <div className="col-md-4">
+          <div className="mb-3 text-center">
+            <div className="placeholder-box">[ Image Placeholder ]</div>
           </div>
 
-          {/* ABILITY BONUSES */}
-          <div className="card mb-3">
-            <div className="card-body">
-              {raceDetails?.ability_bonuses?.length > 0 && (
-                <div className="row mb-4">
-                  <div className="col">
-                    <h5>Ability Bonuses</h5>
-                    <div className="d-flex flex-wrap">
-                      {raceDetails.ability_bonuses.map((ab, i) => (
-                        <div key={i} className="me-4">
-                          <strong>{ab.ability_score.name}:</strong> +{ab.bonus}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+          <div className="mb-3">
+            <ProficiencyBonus
+              level={level}
+              proficiencyBonus={proficiencyBonus}
+            />
+          </div>
+
+          <div className="mb-3">
+            <SavingThrows
+              abilityScores={abilityScores}
+              raceDetails={raceDetails}
+              proficiencyBonus={proficiencyBonus} // TODO: make dynamic later
+              proficiencies={classDetails?.saving_throws.map((st) =>
+                st.name.toUpperCase().slice(0, 3)
               )}
-            </div>
+            />
           </div>
 
-          {/* PROFICIENCIES */}
-          <div className="card mb-3">
-            <div className="card-body">
-              <div className="row mb-4">
-                <div className="col-md-6">
-                  <h5>Race Proficiencies</h5>
-                  <ul className="mb-0">
-                    {raceDetails?.starting_proficiencies?.map((prof, i) => (
-                      <li key={i}>{prof.name}</li>
-                    ))}
-                    {selectedRaceProficiencies.map((index) => {
-                      const match =
-                        raceDetails?.starting_proficiency_options?.from.options.find(
-                          (opt) => opt.item.index === index
-                        );
-                      return match ? (
-                        <li key={index}>{match.item.name}</li>
-                      ) : null;
-                    })}
-                  </ul>
-                </div>
+          <div className="mb-3">
+            <Skills
+              abilityScores={abilityScores}
+              raceDetails={raceDetails}
+              proficiencyBonus={proficiencyBonus}
+              skillProficiencies={skillProficiencies}
+            />
+          </div>
+        </div>
 
-                <div className="col-md-6">
-                  <h5>Class Proficiencies</h5>
-                  <ul className="mb-0">
-                    {classDetails?.proficiencies?.map((prof, i) => (
-                      <li key={i}>{prof.name}</li>
-                    ))}
-                    {selectedClassProficiencies.map((index) => {
-                      const match =
-                        classDetails?.proficiency_choices?.[0]?.from.options.find(
-                          (opt) => opt.item.index === index
-                        );
-                      return match ? (
-                        <li key={index}>{match.item.name}</li>
-                      ) : null;
-                    })}
-                  </ul>
-                </div>
-              </div>
-            </div>
+        {/* RIGHT COLUMN */}
+        <div className="col-md-8">
+          <div className="mb-3">
+            <AbilityScores
+              abilityScores={abilityScores}
+              raceDetails={raceDetails}
+            />
           </div>
 
-          {/* EQUIPMENT + TRAITS */}
-          <div className="row mb-4">
-            <div className="col-md-6">
-              <h5>Starting Equipment</h5>
-              <ul>
-                {classDetails?.starting_equipment?.map((item, i) => (
-                  <li key={i}>
-                    {item.equipment.name} x{item.quantity}
-                  </li>
-                ))}
-                {selectedEquipment &&
-                  classDetails?.starting_equipment_options?.map(
-                    (group, groupIndex) => {
-                      const selectedIndex = selectedEquipment[groupIndex];
-                      const match = group.from.options.find((opt) => {
-                        if (opt.option_type === "counted_reference") {
-                          return opt.of.index === selectedIndex;
-                        }
-                        return false;
-                      });
-                      return match ? (
-                        <li key={groupIndex}>
-                          {match.of.name} x{match.count}
-                        </li>
-                      ) : null;
-                    }
-                  )}
-              </ul>
-            </div>
-
-            <div className="col-md-6">
-              <h5>Traits</h5>
-              <ul>
-                {raceDetails?.traits?.map((trait, i) => (
-                  <li key={i}>{trait.name}</li>
-                ))}
-              </ul>
-            </div>
+          <div className="mb-3">
+            <CombatStats
+              abilityScores={abilityScores}
+              raceDetails={raceDetails}
+              classDetails={classDetails}
+              proficiencyBonus={proficiencyBonus}
+            />
           </div>
 
-          {/* BACKGROUND FEATURE */}
-          {backgroundDetails?.feature && (
-            <div className="row mb-4">
-              <div className="col">
-                <h5>Background Feature: {backgroundDetails.feature.name}</h5>
-                <p>{backgroundDetails.feature.desc}</p>
-              </div>
-            </div>
-          )}
-
-          {/* ACTIONS */}
           <div className="row">
-            <div className="col text-center">
-              <button className="btn btn-outline-secondary me-2">Edit</button>
-              <button className="btn btn-outline-success me-2">
-                Save as PDF
-              </button>
-              <button className="btn btn-outline-primary">Print</button>
+            <div className="col-md-6">
+              <Equipment
+                classDetails={classDetails}
+                selectedEquipment={selectedEquipment}
+                backgroundDetails={backgroundDetails}
+              />
+            </div>
+            <div className="col-md-6">
+              <FeaturesAndTraits
+                raceDetails={raceDetails}
+                classDetails={classDetails}
+                backgroundDetails={backgroundDetails}
+              />
             </div>
           </div>
         </div>
