@@ -1,94 +1,87 @@
-/* Container for all ability scores */
+/* === Layout for the Ability Scores section === */
 .ability-score-container {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
+  display: flex; /* Align ability boxes in a row */
+  justify-content: center; /* Center them horizontally */
+  gap: 1rem; /* Space between each ability box */
+  margin-top: 1rem; /* Margin above the container */
 }
 
-/* Each ability box */
+/* === Styles for each individual ability box (e.g., STR, DEX) === */
 .ability-box {
-  position: relative;
-  width: 70px;
-  padding: 10px;
-  border: 2px solid #333;
-  border-radius: 12px;
-  text-align: center;
-  background-color: #fff;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-  font-family: "Georgia", serif;
+  position: relative; /* Needed for absolutely positioned tooltip inside */
+  width: 70px; /* Fixed width for each box */
+  padding: 10px; /* Internal spacing */
+  border: 2px solid #333; /* Dark border */
+  border-radius: 12px; /* Rounded corners */
+  text-align: center; /* Center all text content */
+  background-color: #fff; /* White background */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1); /* Soft drop shadow */
+  font-family: "Georgia", serif; /* Thematic fantasy-style font */
 }
 
-/* Label at top (e.g., STR, DEX) */
+/* === Top label inside the ability box (e.g., "DEX") === */
 .ability-box .label {
   font-weight: bold;
   font-size: 0.85rem;
   margin-bottom: 4px;
 }
 
-/* Modifier (big number) */
+/* === Modifier number (e.g., +3) === */
 .ability-box .modifier {
-  font-size: 1.75rem;
+  font-size: 1.75rem; /* Large, bold number */
   font-weight: bold;
   margin: 4px 0;
 }
 
-/* Total score below modifier (small text) */
+/* === Total raw score (e.g., 16) shown below modifier === */
 .ability-box .total {
   font-size: 0.75rem;
-  color: #666;
+  color: #666; /* Slightly muted text color */
 }
 
-/* Tooltip styling */
+/* === Tooltip that appears when hovering an ability box === */
 .ability-box:hover .tooltip {
   visibility: visible;
   opacity: 1;
 }
 
+/* === Tooltip hidden by default and shown on hover === */
 .tooltip {
   position: absolute;
-  top: 105%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 4px;
+  top: 105%; /* Slightly below the box */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Nudge back to actual center */
+  background: #333; /* Dark background */
+  color: #fff; /* White text */
+  padding: 6px 10px; /* Spacing inside */
+  border-radius: 4px; /* Rounded corners */
   font-size: 0.75rem;
-  white-space: nowrap;
-  visibility: hidden;
+  white-space: nowrap; /* Prevent line breaks */
+  visibility: hidden; /* Hidden by default */
   opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 10;
+  transition: opacity 0.2s ease; /* Fade-in effect */
+  z-index: 10; /* Appear above other content */
 }
 
-/* Temporary styling */
-.placeholder-box {
-  background-color: #eaeaea;
-  border: 2px dashed #999;
-  border-radius: 10px;
-  padding: 20px;
-  text-align: center;
-  font-style: italic;
-  color: #666;
-}
-
+/* === Circle used to indicate proficiency (Skills & Saving Throws) === */
 .circle {
   display: inline-block;
   width: 14px;
   height: 14px;
   border: 2px solid #333;
-  border-radius: 50%;
+  border-radius: 50%; /* Makes it a circle */
 }
 
+/* === Filled circle for active proficiencies === */
 .circle.filled {
   background-color: #333;
 }
 
+/* === Circle used in Death Saves (Success/Failure bubbles) === */
 .death-save-circle {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   border: 2px solid #333;
-  background-color: #fff;
+  background-color: #fff; /* Empty by default */
 }

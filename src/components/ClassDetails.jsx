@@ -7,19 +7,26 @@ function ClassDetails({
   setSelectedEquipment,
   onToggle,
 }) {
+  // Guard clause – wait for data before rendering
   if (!classDetails) return null;
 
+  // Extract the first proficiency choice block (usually "choose X from Y")
   const proficiencyChoice = classDetails.proficiency_choices?.[0];
+
+  // Get class equipment options (some classes let players choose between gear sets)
   const equipmentOptions = classDetails.starting_equipment_options || [];
 
   return (
     <div className="mt-4">
+      {/* --- Class Overview Section --- */}
       <h5>
         <strong>Class Details</strong>
       </h5>
       <p>
         <strong>Hit Die:</strong> 1d{classDetails.hit_die} / Lvl
       </p>
+
+      {/* --- Choose Proficiencies Section --- */}
       {proficiencyChoice && (
         <div className="mb-3">
           <h6>
@@ -33,6 +40,7 @@ function ClassDetails({
 
             return (
               <div key={index} className="form-check">
+                {/* Checkbox for each available skill option */}
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -54,6 +62,8 @@ function ClassDetails({
           })}
         </div>
       )}
+
+      {/* --- Static Proficiency List --- */}
       <p>
         <strong>Class Proficiencies:</strong>
       </p>
@@ -62,6 +72,8 @@ function ClassDetails({
           <li key={i}>{prof.name}</li>
         ))}
       </ul>
+
+      {/* --- Fixed Starting Equipment List --- */}
       {classDetails.starting_equipment?.length > 0 && (
         <>
           <p>
@@ -76,14 +88,18 @@ function ClassDetails({
           </ul>
         </>
       )}
+
+      {/* --- Choose Equipment Options Section --- */}
       {equipmentOptions.length > 0 && (
         <div className="mb-3">
           <h6>
             <strong>Choose Starting Class Equipment</strong>
           </h6>
-          {equipmentOptions.map((group, groupIndex) => (
+
+          {equipmentOptions?.map((group, groupIndex) => (
             <div key={groupIndex} className="mb-2">
               <p>{group.desc}</p>
+
               <select
                 className="form-select"
                 value={selectedEquipment[groupIndex] || ""}
@@ -96,8 +112,9 @@ function ClassDetails({
                 }}
               >
                 <option value="">Select an option</option>
-                {group.from.options.map((option, i) => {
-                  // Handle counted_reference type
+
+                {group.from.options?.map((option, i) => {
+                  // Handle normal equipment reference (with count)
                   if (option.option_type === "counted_reference") {
                     const item = option.of;
                     return (
@@ -107,7 +124,7 @@ function ClassDetails({
                     );
                   }
 
-                  // Skip unsupported "choice" objects for now
+                  // Gracefully skip unsupported "choice" types
                   if (option.option_type === "choice") {
                     return (
                       <option key={i} disabled>

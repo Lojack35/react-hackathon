@@ -1,14 +1,30 @@
+// ==============================
+// Imports
+// ==============================
 import { useState } from "react";
-import { useDnDList, useDnDDetail } from "../hooks/useDnDData";
+import { useDnDList, useDnDDetail } from "../hooks/useDnDData"; // Custom hooks to fetch lists/details from DND 5E API
 import RaceDetails from "./RaceDetails";
 import ClassDetails from "./ClassDetails";
 import BackgroundDetails from "./BackgroundDetails";
 
-function CharacterForm({ onGenerate }) {
+// ==============================
+// CharacterForm Component
+// ==============================
+
+function CharacterForm({
+  onGenerate, // Callback to generate full character data
+  onPortraitGenerated, // Callback to set the portrait URL
+  setIsLoadingPortrait, // Callback to toggle loading spinner
+}) {
+  // ========== State Setup ==========
+
+  // Character identity and selection states
   const [name, setName] = useState("");
   const [selectedRace, setSelectedRace] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedBackground, setSelectedBackground] = useState("");
+
+  // Arrays of selected proficiencies and equipment
   const [selectedClassProficiencies, setSelectedClassProficiencies] = useState(
     []
   );
@@ -16,7 +32,9 @@ function CharacterForm({ onGenerate }) {
     []
   );
   const [selectedEquipment, setSelectedEquipment] = useState([]);
-  const [abilityScores, setabilityScores] = useState({
+
+  // Ability scores mapping: STR, DEX, etc.
+  const [abilityScores, setAbilityScores] = useState({
     STR: null,
     DEX: null,
     CON: null,
@@ -25,30 +43,66 @@ function CharacterForm({ onGenerate }) {
     CHA: null,
   });
 
+  // ========== Fetch Lists via Custom Hook ==========
   const { data: races } = useDnDList("races");
   const { data: classes } = useDnDList("classes");
   const { data: backgrounds } = useDnDList("backgrounds");
 
+  // ========== Fetch Detailed Info ==========
   const raceDetails = useDnDDetail("races", selectedRace);
   const classDetails = useDnDDetail("classes", selectedClass);
   const backgroundDetails = useDnDDetail("backgrounds", selectedBackground);
 
+  // ========== Proficiency Toggle Handler ==========
   const handleProficiencyToggle = (index, maxAllowed, setSelected) => {
     setSelected((prev) => {
       if (prev.includes(index)) {
-        return prev.filter((i) => i !== index);
+        return prev.filter((i) => i !== index); // Remove if already selected
       } else if (prev.length < maxAllowed) {
-        return [...prev, index];
+        return [...prev, index]; // Add if under limit
       } else {
-        return prev;
+        return prev; // Ignore if at limit
       }
     });
   };
 
+  // ========== Image Generation via API ==========
+  const generatePortrait = async () => {
+    // Dynamically constructed prompt for the DALL·E API
+    const prompt = `A high fantasy portrait of a ${selectedRace} ${selectedClass}, shown close-up and centered in heroic pose under dramatic lighting. They wear intricate fantasy armor with rich details. Behind them: a blurred scenic backdrop—rolling hills, ancient ruins, or a misty forest—with hints of classic D&D themes like dragons or glowing runes. Vibrant colors, cinematic atmosphere, and magical adventure.`;
+
+    setIsLoadingPortrait(true); // Start spinner
+
+    try {
+      const response = await fetch("/api/generate-portrait", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error?.message || "Failed to generate portrait");
+      }
+
+      onPortraitGenerated(data.imageUrl); // Set the generated image
+    } catch (err) {
+      console.error("Error generating portrait:", err);
+      onPortraitGenerated(null); // Set null on error
+    } finally {
+      setIsLoadingPortrait(false); // Stop spinner
+    }
+  };
+
+  // ==============================
+  // Render Form UI
+  // ==============================
   return (
     <div className="card p-3 shadow-lg bg-light-subtle">
       <h5 className="card-title mb-3">Character Builder</h5>
 
+      {/* Name Input */}
       <div className="mb-3">
         <label className="form-label">Character Name</label>
         <input
@@ -60,6 +114,7 @@ function CharacterForm({ onGenerate }) {
         />
       </div>
 
+      {/* Race Dropdown */}
       <div className="mb-3">
         <label className="form-label">Race</label>
         <select
@@ -76,6 +131,7 @@ function CharacterForm({ onGenerate }) {
         </select>
       </div>
 
+      {/* Class Dropdown */}
       <div className="mb-3">
         <label className="form-label">Class</label>
         <select
@@ -92,6 +148,7 @@ function CharacterForm({ onGenerate }) {
         </select>
       </div>
 
+      {/* Background Dropdown */}
       <div className="mb-3">
         <label className="form-label">Background</label>
         <select
@@ -108,46 +165,54 @@ function CharacterForm({ onGenerate }) {
         </select>
       </div>
 
-      {/* Display Race Details */}
-      {raceDetails && (
-        <RaceDetails
-          raceDetails={raceDetails}
-          selectedRaceProficiencies={selectedRaceProficiencies}
-          onToggle={(index) =>
-            handleProficiencyToggle(
-              index,
-              raceDetails.starting_proficiency_options?.choose,
-              setSelectedRaceProficiencies
-            )
-          }
-        />
-      )}
+      {/* Race Proficiencies & Traits */}
+      <div className="mb-3 border rounded p-3 bg-white shadow-sm">
+        {raceDetails && (
+          <RaceDetails
+            raceDetails={raceDetails}
+            selectedRaceProficiencies={selectedRaceProficiencies}
+            onToggle={(index) =>
+              handleProficiencyToggle(
+                index,
+                raceDetails.starting_proficiency_options?.choose,
+                setSelectedRaceProficiencies
+              )
+            }
+          />
+        )}
+      </div>
 
-      {/* Display Class Details */}
-      {classDetails && (
-        <ClassDetails
-          classDetails={classDetails}
-          selectedClassProficiencies={selectedClassProficiencies}
-          onToggle={(index) =>
-            handleProficiencyToggle(
-              index,
-              classDetails.proficiency_choices[0].choose,
-              setSelectedClassProficiencies
-            )
-          }
-          selectedEquipment={selectedEquipment}
-          setSelectedEquipment={setSelectedEquipment}
-        />
-      )}
+      {/* Class Proficiencies & Equipment */}
+      <div className="mb-3 border rounded p-3 bg-white shadow-sm">
+        {classDetails && (
+          <ClassDetails
+            classDetails={classDetails}
+            selectedClassProficiencies={selectedClassProficiencies}
+            onToggle={(index) =>
+              handleProficiencyToggle(
+                index,
+                classDetails.proficiency_choices[0].choose,
+                setSelectedClassProficiencies
+              )
+            }
+            selectedEquipment={selectedEquipment}
+            setSelectedEquipment={setSelectedEquipment}
+          />
+        )}
+      </div>
 
-      {/* Display Background Details */}
-      {backgroundDetails && (
-        <BackgroundDetails backgroundDetails={backgroundDetails} />
-      )}
+      {/* Background Perks */}
+      <div className="mb-3 border rounded p-3 bg-white shadow-sm">
+        {backgroundDetails && (
+          <BackgroundDetails backgroundDetails={backgroundDetails} />
+        )}
+      </div>
 
-      {/* Ability Scores Section */}
-      <div className="mb-3">
-        <label className="form-label">Assign Ability Scores</label>
+      {/* Ability Score Assignment */}
+      <div className="mb-3 border rounded p-3 bg-white shadow-sm">
+        <label className="form-label">
+          <strong>Assign Ability Scores</strong>
+        </label>
 
         {["STR", "DEX", "CON", "INT", "WIS", "CHA"].map((ability) => (
           <div key={ability} className="mb-2 d-flex align-items-center gap-2">
@@ -156,7 +221,7 @@ function CharacterForm({ onGenerate }) {
               className="form-select"
               value={abilityScores[ability] ?? ""}
               onChange={(e) =>
-                setabilityScores((prev) => ({
+                setAbilityScores((prev) => ({
                   ...prev,
                   [ability]: parseInt(e.target.value),
                 }))
@@ -179,7 +244,9 @@ function CharacterForm({ onGenerate }) {
         ))}
       </div>
 
+      {/* Generate Buttons */}
       <div className="d-grid mt-4">
+        {/* Character Data Submit */}
         <button
           className="btn btn-primary"
           onClick={() => {
@@ -203,6 +270,15 @@ function CharacterForm({ onGenerate }) {
           }
         >
           Generate Character
+        </button>
+
+        {/* DALL·E Portrait Button */}
+        <button
+          className="btn btn-secondary mt-2"
+          onClick={generatePortrait}
+          disabled={!selectedRace || !selectedClass}
+        >
+          Generate Portrait
         </button>
       </div>
     </div>

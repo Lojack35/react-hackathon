@@ -1,7 +1,69 @@
+/* === Root CSS Variables and Defaults === */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* Base font stack fallback */
+
   font-synthesis: none;
+  /* Prevents synthetic bold/italic by browser */
+
   text-rendering: optimizeLegibility;
+  /* Enhances kerning and legibility */
+
   -webkit-font-smoothing: antialiased;
+  /* Better font rendering on WebKit (Chrome, Safari) */
+
   -moz-osx-font-smoothing: grayscale;
+  /* Font rendering enhancement for macOS Firefox */
+}
+
+/* === General Body Styling === */
+body {
+  background: linear-gradient(#f5f3e7 0%, #d2c0b0 40%, #8b6f4e 100%);
+  /* Vertical gradient mimicking parchment fading to leather tones */
+
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  /* Clean, modern fallback stack for body text */
+
+  color: #2e2e2e;
+  /* Dark grey text for good contrast */
+
+  min-height: 100vh;
+  /* Ensures background fills full vertical space */
+}
+
+/* === Heading Font Override for Fantasy Flair === */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Cinzel", serif;
+  /* Stylized serif font with a fantasy/RPG vibe */
+}
+
+/* === Card Styling for UI Elements (Bootstrap override/custom) === */
+.card {
+  background-color: #ffffff;
+  border-radius: 1rem; /* Large round corners for softness */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Gentle drop shadow */
+}
+
+/* === Primary Button Theme (Brown Leather Tone) === */
+.btn-primary {
+  background-color: #5e3b2c; /* Rich leather brown */
+  border: none; /* Clean button edge */
+}
+
+.btn-primary:hover {
+  background-color: #7a4a34; /* Lighter tone on hover */
+}
+
+/* === Scrollbar Styling (WebKit Browsers Only) === */
+::-webkit-scrollbar {
+  width: 8px; /* Thin scrollbar */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #7a4a34; /* Matches button hover */
+  border-radius: 4px; /* Soft round thumb */
 }

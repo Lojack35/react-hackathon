@@ -1,4 +1,9 @@
+// ==============================
+// Imports
+// ==============================
 import React from "react";
+
+// Component Imports
 import ProficiencyBonus from "./ProficiencyBonus";
 import AbilityScores from "./AbilityScores";
 import SavingThrows from "./SavingThrows";
@@ -6,12 +11,21 @@ import Skills from "./Skills";
 import CombatStats from "./CombatStats";
 import Equipment from "./Equipment";
 import FeaturesAndTraits from "./FeaturesAndTraits";
+
+// Utility Function
 import getProficiencyBonus from "../utils/getProficiencyBonus";
+
+// Styling
 import "../CharacterSheet.css";
 
-function CharacterSheet({ formData }) {
+// ==============================
+// CharacterSheet Component
+// ==============================
+function CharacterSheet({ formData, portraitUrl, isLoadingPortrait }) {
+  // Return nothing if no character has been generated yet
   if (!formData) return null;
 
+  // ========== Destructure character data ==========
   const {
     name,
     selectedRace,
@@ -26,16 +40,18 @@ function CharacterSheet({ formData }) {
     abilityScores,
   } = formData;
 
-  const level = 1; // TODO: make dynamic later
-  const proficiencyBonus = getProficiencyBonus(level);
+  const level = 1; // Currently hardcoded — can be updated to allow level selection
+  const proficiencyBonus = getProficiencyBonus(level); // Lookup from level
 
-  // Get background skill proficiencies
+  // ========== Extract Skill Proficiencies ==========
+
+  // From background
   const backgroundSkills =
     backgroundDetails?.starting_proficiencies?.map((p) =>
       p.name.toLowerCase().replace("skill: ", "").trim()
     ) || [];
 
-  // Get class skill proficiencies from selected indexes
+  // From selected class options (based on selected indexes)
   const classSkills = selectedClassProficiencies
     .map((index) =>
       classDetails?.proficiency_choices
@@ -50,16 +66,17 @@ function CharacterSheet({ formData }) {
       match.item.name.toLowerCase().replace("skill: ", "").trim()
     );
 
-  // Final combined list of skill proficiencies
+  // Combine all into a single array of skill proficiencies
   const skillProficiencies = [...backgroundSkills, ...classSkills];
 
-  function getModifier(score) {
-    return Math.floor((score - 10) / 2);
-  }
-
+  // ==============================
+  // JSX Layout Return
+  // ==============================
   return (
-    <div className="character-sheet container-fluid p-4 bg-light-subtle rounded shadow">
-      {/* TOP SECTION: Name + Class/Level/Race/Background */}
+    <div className="character-sheet card p-3 shadow-lg bg-light-subtle">
+      {/* ==============================
+          TOP: Character Overview
+      ============================== */}
       <div className="top-section mb-4">
         <div className="d-flex flex-column align-items-center">
           <h2 className="mb-2">{name || "Unnamed Hero"}</h2>
@@ -75,21 +92,39 @@ function CharacterSheet({ formData }) {
               {backgroundDetails?.name || selectedBackground}
             </span>
             <span>
-              <strong>Level:</strong> 1
-            </span>{" "}
-            {/* TODO: make dynamic later */}
+              <strong>Level:</strong> 1 {/* TODO: make dynamic later */}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* MAIN GRID */}
+      {/* ==============================
+          MAIN GRID LAYOUT
+      ============================== */}
       <div className="row">
-        {/* LEFT COLUMN */}
+        {/* ========== LEFT COLUMN ========== */}
         <div className="col-md-4">
+          {/* Portrait Area */}
           <div className="mb-3 text-center">
-            <div className="placeholder-box">[ Image Placeholder ]</div>
+            {isLoadingPortrait ? (
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            ) : portraitUrl ? (
+              <img
+                src={portraitUrl}
+                alt="Character portrait"
+                className="img-fluid rounded shadow-sm"
+                style={{ maxHeight: "300px", objectFit: "cover" }}
+              />
+            ) : (
+              <div className="placeholder-box bg-light-subtle text-muted py-5 rounded">
+                [ No Portrait Yet ]
+              </div>
+            )}
           </div>
 
+          {/* Proficiency Bonus Display */}
           <div className="mb-3">
             <ProficiencyBonus
               level={level}
@@ -97,17 +132,19 @@ function CharacterSheet({ formData }) {
             />
           </div>
 
+          {/* Saving Throws Table */}
           <div className="mb-3">
             <SavingThrows
               abilityScores={abilityScores}
               raceDetails={raceDetails}
-              proficiencyBonus={proficiencyBonus} // TODO: make dynamic later
+              proficiencyBonus={proficiencyBonus}
               proficiencies={classDetails?.saving_throws.map((st) =>
                 st.name.toUpperCase().slice(0, 3)
               )}
             />
           </div>
 
+          {/* Skills Table */}
           <div className="mb-3">
             <Skills
               abilityScores={abilityScores}
@@ -118,8 +155,9 @@ function CharacterSheet({ formData }) {
           </div>
         </div>
 
-        {/* RIGHT COLUMN */}
+        {/* ========== RIGHT COLUMN ========== */}
         <div className="col-md-8">
+          {/* Ability Scores Table */}
           <div className="mb-3">
             <AbilityScores
               abilityScores={abilityScores}
@@ -127,6 +165,7 @@ function CharacterSheet({ formData }) {
             />
           </div>
 
+          {/* Combat Stats (HP, AC, Initiative) */}
           <div className="mb-3">
             <CombatStats
               abilityScores={abilityScores}
@@ -136,7 +175,9 @@ function CharacterSheet({ formData }) {
             />
           </div>
 
+          {/* Equipment and Traits Side-by-Side */}
           <div className="row">
+            {/* Equipment (from class + background) */}
             <div className="col-md-6">
               <Equipment
                 classDetails={classDetails}
@@ -144,6 +185,8 @@ function CharacterSheet({ formData }) {
                 backgroundDetails={backgroundDetails}
               />
             </div>
+
+            {/* Racial/Class/Background Features */}
             <div className="col-md-6">
               <FeaturesAndTraits
                 raceDetails={raceDetails}
